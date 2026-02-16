@@ -1,0 +1,135 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: 'JetBrains Mono';
+  src: url('https://fonts.gstatic.com/s/jetbrainsmono/v18/tDbY2o-flEEny0FZhsfKu5WU4zr3E_BX0PnT8RD8yKxjPVmUsaaDhw.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'IBM Plex Sans';
+  src: url('https://fonts.gstatic.com/s/ibmplexsans/v19/zYXgKVElMYYaJe8bpLHnCwDKhdHeFaxOedc.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+}
+
+:root {
+  /* Nether Command Center Theme */
+  --background: #0a0a0f;
+  --foreground: #e5e5e5;
+
+  /* Card colors */
+  --card: #1a1a2e;
+  --card-border: #2a2a3e;
+  --card-hover: #22223a;
+
+  /* Accent colors */
+  --accent-gold: #F5A623;
+  --accent-emerald: #2ECC71;
+  --accent-red: #E74C3C;
+  --accent-orange: #E67E22;
+  --accent-blue: #3498DB;
+  --accent-purple: #9B59B6;
+
+  /* Text colors */
+  --text-muted: #888899;
+  --text-dim: #666677;
+
+  /* Status colors */
+  --online: #2ECC71;
+  --offline: #E74C3C;
+  --warning: #F5A623;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-border: var(--card-border);
+  --color-card-hover: var(--card-hover);
+  --color-accent-gold: var(--accent-gold);
+  --color-accent-emerald: var(--accent-emerald);
+  --color-accent-red: var(--accent-red);
+  --color-accent-orange: var(--accent-orange);
+  --color-accent-blue: var(--accent-blue);
+  --color-accent-purple: var(--accent-purple);
+  --color-text-muted: var(--text-muted);
+  --color-text-dim: var(--text-dim);
+  --color-online: var(--online);
+  --color-offline: var(--offline);
+  --color-warning: var(--warning);
+  --font-sans: 'IBM Plex Sans', Arial, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--card);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--card-border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-dim);
+}
+
+/* Pulse animation for status dot */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Glow effect for cards on hover */
+.card-glow:hover {
+  box-shadow: 0 0 20px rgba(245, 166, 35, 0.1);
+}
+
+/* Terminal text styling */
+.terminal-text {
+  font-family: 'JetBrains Mono', monospace;
+  color: #2ECC71;
+}
+
+/* Number transition animation */
+.number-transition {
+  transition: all 0.3s ease-out;
+}
+
+/* Fade in animation for new log entries */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
