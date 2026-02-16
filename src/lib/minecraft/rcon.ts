@@ -1,12 +1,14 @@
 import { Rcon } from 'rcon-client';
 import type { RconResponse, TpsData } from '@/types/minecraft';
 
-const RCON_CONFIG = {
-  host: process.env.MC_SERVER_HOST || '127.0.0.1',
-  port: parseInt(process.env.MC_RCON_PORT || '25575', 10),
-  password: process.env.MC_RCON_PASSWORD || '',
-  timeout: 5000,
-};
+function getRconConfig() {
+  return {
+    host: process.env.MC_SERVER_HOST || '127.0.0.1',
+    port: parseInt(process.env.MC_RCON_PORT || '25575', 10),
+    password: process.env.MC_RCON_PASSWORD || '',
+    timeout: 5000,
+  };
+}
 
 // Singleton RCON connection
 let rconInstance: Rcon | null = null;
@@ -29,11 +31,12 @@ async function getConnection(): Promise<Rcon> {
   isConnecting = true;
 
   try {
+    const config = getRconConfig();
     rconInstance = await Rcon.connect({
-      host: RCON_CONFIG.host,
-      port: RCON_CONFIG.port,
-      password: RCON_CONFIG.password,
-      timeout: RCON_CONFIG.timeout,
+      host: config.host,
+      port: config.port,
+      password: config.password,
+      timeout: config.timeout,
     });
 
     rconInstance.on('error', (err) => {
