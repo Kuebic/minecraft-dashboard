@@ -22,7 +22,11 @@ const WS_PORT = parseInt(process.env.WS_PORT || '3001', 10);
 const httpServer = createServer();
 const io = new Server(httpServer, {
   cors: {
-    origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
+    origin: [
+      'http://localhost:3000',
+      'http://127.0.0.1:3000',
+      'http://10.0.0.201:3000',
+    ],
     methods: ['GET', 'POST'],
     credentials: true,
   },
