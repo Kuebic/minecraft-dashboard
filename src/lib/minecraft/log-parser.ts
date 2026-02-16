@@ -1,6 +1,6 @@
 import fs from 'fs';
 import { EventEmitter } from 'events';
-import type { EventType, ServerEvent } from '@/types/minecraft';
+import type { EventType } from '@/types/minecraft';
 
 const LOG_PATTERNS = {
   // Matches: [HH:MM:SS INFO]: PlayerName joined the game

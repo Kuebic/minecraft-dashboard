@@ -35,7 +35,7 @@ export function useServerStatus(): UseServerStatusReturn {
             authToken = tokenData.token;
           }
         }
-      } catch (err) {
+      } catch {
         console.log('[WS] Could not fetch auth token, connecting without auth');
       }
 

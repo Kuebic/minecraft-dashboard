@@ -10,7 +10,6 @@ import {
   Save,
   Megaphone,
   RefreshCw,
-  AlertTriangle,
 } from 'lucide-react';
 
 export function QuickActions() {

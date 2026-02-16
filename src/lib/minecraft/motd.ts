@@ -18,15 +18,6 @@ const COLOR_CODES: Record<string, string> = {
   'f': '#FFFFFF', // White
 };
 
-const FORMAT_CODES: Record<string, string> = {
-  'k': 'obfuscated', // Obfuscated (not commonly rendered)
-  'l': 'font-weight: bold',
-  'm': 'text-decoration: line-through',
-  'n': 'text-decoration: underline',
-  'o': 'font-style: italic',
-  'r': 'reset', // Reset all formatting
-};
-
 export interface MotdSegment {
   text: string;
   color?: string;

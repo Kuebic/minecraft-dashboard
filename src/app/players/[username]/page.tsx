@@ -16,7 +16,6 @@ import {
   Calendar,
   Ban,
   UserX,
-  MessageSquare,
   Trophy,
 } from 'lucide-react';
 
@@ -73,7 +72,7 @@ export default function PlayerDetailPage({ params }: PageProps) {
         } else {
           setError(data.error || 'Failed to load player data');
         }
-      } catch (err) {
+      } catch {
         setError('Failed to load player data');
       } finally {
         setIsLoading(false);

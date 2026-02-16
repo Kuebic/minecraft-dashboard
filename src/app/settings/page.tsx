@@ -26,7 +26,7 @@ export default function SettingsPage() {
         } else {
           setError(data.error || 'Failed to load configuration');
         }
-      } catch (err) {
+      } catch {
         setError('Failed to load server configuration');
       } finally {
         setIsLoading(false);
@@ -70,7 +70,7 @@ export default function SettingsPage() {
                 </div>
                 <p className="text-sm text-text-muted mt-2">
                   Make sure the dashboard has read access to server.properties.
-                  Check that you've added your user to the minecraft group.
+                  Check that you&apos;ve added your user to the minecraft group.
                 </p>
               </div>
             )}
