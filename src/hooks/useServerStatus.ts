@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { io, Socket } from 'socket.io-client';
 import type { ServerStatus, WsMessage, ServerEvent, OnlinePlayer } from '@/types/minecraft';
 
@@ -22,105 +22,124 @@ export function useServerStatus(): UseServerStatusReturn {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const socket: Socket = io(WS_URL, {
-      transports: ['websocket', 'polling'],
-      reconnection: true,
-      reconnectionAttempts: Infinity,
-      reconnectionDelay: 1000,
-      reconnectionDelayMax: 5000,
-    });
+    let socket: Socket | null = null;
 
-    socket.on('connect', () => {
-      console.log('[WS] Connected');
-      setIsConnected(true);
-      setError(null);
-    });
-
-    socket.on('disconnect', () => {
-      console.log('[WS] Disconnected');
-      setIsConnected(false);
-    });
-
-    socket.on('connect_error', (err) => {
-      console.error('[WS] Connection error:', err.message);
-      setError(`Connection error: ${err.message}`);
-      setIsConnected(false);
-    });
-
-    socket.on('message', (message: WsMessage) => {
-      switch (message.type) {
-        case 'server-status':
-          setStatus(message.data);
-          break;
-
-        case 'player-join':
-          setOnlinePlayers((prev) => {
-            // Remove if already exists, then add
-            const filtered = prev.filter(
-              (p) => p.username !== message.data.username
-            );
-            return [
-              ...filtered,
-              {
-                username: message.data.username,
-                joinTime: new Date(message.data.timestamp),
-                sessionDuration: 0,
-              },
-            ];
-          });
-          break;
-
-        case 'player-leave':
-          setOnlinePlayers((prev) =>
-            prev.filter((p) => p.username !== message.data.username)
-          );
-          break;
-
-        case 'event':
-          setEvents((prev) => {
-            // Keep last 100 events
-            const newEvents = [message.data, ...prev];
-            return newEvents.slice(0, 100);
-          });
-          break;
-
-        case 'metrics-update':
-          // Update TPS in status if we have status
-          setStatus((prev) =>
-            prev
-              ? {
-                  ...prev,
-                  tps: { ...prev.tps, oneMin: message.data.tps },
-                  playerCount: message.data.playerCount,
-                }
-              : null
-          );
-          break;
+    async function connectSocket() {
+      // Fetch WebSocket auth token
+      let authToken: string | null = null;
+      try {
+        const tokenResponse = await fetch('/api/auth/ws-token');
+        if (tokenResponse.ok) {
+          const tokenData = await tokenResponse.json();
+          if (tokenData.success) {
+            authToken = tokenData.token;
+          }
+        }
+      } catch (err) {
+        console.log('[WS] Could not fetch auth token, connecting without auth');
       }
-    });
 
-    // Fetch initial online players
-    fetch('/api/players/online')
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success) {
-          setOnlinePlayers(data.data);
-        }
-      })
-      .catch(console.error);
+      socket = io(WS_URL, {
+        transports: ['websocket', 'polling'],
+        reconnection: true,
+        reconnectionAttempts: Infinity,
+        reconnectionDelay: 1000,
+        reconnectionDelayMax: 5000,
+        auth: authToken ? { token: authToken } : undefined,
+      });
 
-    // Fetch initial events
-    fetch('/api/events?limit=50')
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.success) {
-          setEvents(data.data);
+      socket.on('connect', () => {
+        console.log('[WS] Connected');
+        setIsConnected(true);
+        setError(null);
+      });
+
+      socket.on('disconnect', () => {
+        console.log('[WS] Disconnected');
+        setIsConnected(false);
+      });
+
+      socket.on('connect_error', (err: Error) => {
+        console.error('[WS] Connection error:', err.message);
+        setError(`Connection error: ${err.message}`);
+        setIsConnected(false);
+      });
+
+      socket.on('message', (message: WsMessage) => {
+        switch (message.type) {
+          case 'server-status':
+            setStatus(message.data);
+            break;
+
+          case 'player-join':
+            setOnlinePlayers((prev) => {
+              // Remove if already exists, then add
+              const filtered = prev.filter((p) => p.username !== message.data.username);
+              return [
+                ...filtered,
+                {
+                  username: message.data.username,
+                  joinTime: new Date(message.data.timestamp),
+                  sessionDuration: 0,
+                },
+              ];
+            });
+            break;
+
+          case 'player-leave':
+            setOnlinePlayers((prev) => prev.filter((p) => p.username !== message.data.username));
+            break;
+
+          case 'event':
+            setEvents((prev) => {
+              // Keep last 100 events
+              const newEvents = [message.data, ...prev];
+              return newEvents.slice(0, 100);
+            });
+            break;
+
+          case 'metrics-update':
+            // Update TPS in status if we have status
+            setStatus((prev) =>
+              prev
+                ? {
+                    ...prev,
+                    tps: { ...prev.tps, oneMin: message.data.tps },
+                    playerCount: message.data.playerCount,
+                  }
+                : null
+            );
+            break;
         }
-      })
-      .catch(console.error);
+      });
+
+      // Fetch initial online players
+      fetch('/api/players/online')
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success) {
+            setOnlinePlayers(data.data);
+          }
+        })
+        .catch(console.error);
+
+      // Fetch initial events
+      fetch('/api/events?limit=50')
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success) {
+            setEvents(data.data);
+          }
+        })
+        .catch(console.error);
+    }
+
+    connectSocket();
 
     return () => {
-      socket.disconnect();
+      if (socket) {
+        socket.disconnect();
+      }
     };
   }, []);
 

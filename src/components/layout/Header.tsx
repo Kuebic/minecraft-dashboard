@@ -1,8 +1,9 @@
 'use client';
 
 import { StatusDot } from '@/components/ui/StatusDot';
-import { Settings, Bell, Menu } from 'lucide-react';
+import { Settings, Bell, Menu, LogOut } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 interface HeaderProps {
   online: boolean;
@@ -10,6 +11,13 @@ interface HeaderProps {
 }
 
 export function Header({ online, onMenuClick }: HeaderProps) {
+  const router = useRouter();
+
+  async function handleLogout() {
+    await fetch('/api/auth/logout', { method: 'POST' });
+    router.push('/login');
+    router.refresh();
+  }
   return (
     <header className="flex items-center justify-between px-6 py-4 bg-card border-b border-card-border">
       {/* Mobile menu button */}
@@ -47,6 +55,15 @@ export function Header({ online, onMenuClick }: HeaderProps) {
         >
           <Settings className="w-5 h-5" />
         </Link>
+
+        {/* Logout button */}
+        <button
+          onClick={handleLogout}
+          className="p-2 text-text-muted hover:text-accent-red transition-colors rounded-lg hover:bg-card-hover"
+          title="Logout"
+        >
+          <LogOut className="w-5 h-5" />
+        </button>
       </div>
     </header>
   );

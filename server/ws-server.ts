@@ -1,6 +1,7 @@
 import dotenv from 'dotenv';
 import { existsSync } from 'fs';
 import { resolve } from 'path';
+import { jwtVerify } from 'jose';
 
 // Load .env.local if it exists, otherwise fall back to .env
 const envLocalPath = resolve(process.cwd(), '.env.local');
@@ -32,6 +33,26 @@ import type { ServerStatus, WsMessage } from '../src/types/minecraft';
 
 const WS_PORT = parseInt(process.env.WS_PORT || '3001', 10);
 
+// Get secret key for JWT verification
+function getSecretKey(): Uint8Array {
+  const secret = process.env.AUTH_SECRET || process.env.DASHBOARD_PASSWORD;
+  if (!secret) {
+    throw new Error('AUTH_SECRET or DASHBOARD_PASSWORD must be set');
+  }
+  return new TextEncoder().encode(secret);
+}
+
+// Verify JWT token
+async function verifyToken(token: string): Promise<boolean> {
+  try {
+    const secretKey = getSecretKey();
+    await jwtVerify(token, secretKey);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 // Create HTTP server and Socket.IO
 const httpServer = createServer();
 const io = new Server(httpServer, {
@@ -45,6 +66,31 @@ const io = new Server(httpServer, {
     methods: ['GET', 'POST'],
     credentials: true,
   },
+});
+
+// Authentication middleware for WebSocket connections
+io.use(async (socket, next) => {
+  const token = socket.handshake.auth?.token || (socket.handshake.query?.token as string);
+
+  // In development without auth configured, allow connections
+  if (!process.env.DASHBOARD_PASSWORD) {
+    console.log('[WS] No DASHBOARD_PASSWORD set, skipping auth');
+    return next();
+  }
+
+  if (!token) {
+    console.log('[WS] Connection rejected: no token provided');
+    return next(new Error('Authentication required'));
+  }
+
+  const isValid = await verifyToken(token);
+  if (!isValid) {
+    console.log('[WS] Connection rejected: invalid token');
+    return next(new Error('Invalid token'));
+  }
+
+  console.log('[WS] Connection authenticated');
+  next();
 });
 
 // Track server uptime
