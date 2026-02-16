@@ -81,7 +81,9 @@ export async function isServerOnline(): Promise<boolean> {
   try {
     await getConnection();
     return true;
-  } catch {
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : 'Unknown error';
+    console.error('[RCON] isServerOnline failed:', msg);
     return false;
   }
 }

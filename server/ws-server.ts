@@ -44,6 +44,7 @@ let logTailer: LogTailer | null = null;
 async function broadcastServerStatus(): Promise<void> {
   try {
     const online = await isServerOnline();
+    console.log('[WS] Server online status:', online);
 
     if (!online) {
       firstConnectTime = null;
