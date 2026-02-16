@@ -40,6 +40,7 @@ const io = new Server(httpServer, {
       'http://localhost:3000',
       'http://127.0.0.1:3000',
       'http://10.0.0.201:3000',
+      'https://craftboard.menning.cloud',
     ],
     methods: ['GET', 'POST'],
     credentials: true,
