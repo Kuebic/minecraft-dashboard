@@ -13,7 +13,7 @@ if (existsSync(envLocalPath)) {
   dotenv.config({ path: envPath });
 }
 
-import { Server } from 'socket.io';
+import { Server, Socket, ExtendedError } from 'socket.io';
 import { createServer } from 'http';
 import {
   isServerOnline,
@@ -69,7 +69,7 @@ const io = new Server(httpServer, {
 });
 
 // Authentication middleware for WebSocket connections
-io.use(async (socket, next) => {
+io.use(async (socket: Socket, next: (err?: ExtendedError) => void) => {
   const token = socket.handshake.auth?.token || (socket.handshake.query?.token as string);
 
   // In development without auth configured, allow connections
@@ -246,7 +246,7 @@ async function startLogTailer(): Promise<void> {
 }
 
 // Handle client connections
-io.on('connection', (socket) => {
+io.on('connection', (socket: Socket) => {
   console.log(`[WS] Client connected: ${socket.id}`);
 
   // Send initial status immediately
@@ -262,7 +262,7 @@ httpServer.listen(WS_PORT, () => {
   console.log(`[WS] WebSocket server running on port ${WS_PORT}`);
 
   // Start log tailer
-  startLogTailer().catch((err) => {
+  startLogTailer().catch((err: unknown) => {
     console.error('[WS] Failed to start log tailer:', err);
   });
 
